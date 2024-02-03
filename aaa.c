@@ -15,8 +15,6 @@ size_t	checkk(char* buffer, char c)
 			return (z + 1);*/
 		z++;
 	}
-	/*if (c == '\0')
-		z -= 1;*/
 	if (buffer && buffer[z] == c)
 		return (z + 1);
 	return (0);
@@ -75,7 +73,7 @@ char*	ft_strjoin(char* storage, char* buffer, char c)
 	return (new);
 }
 
-char*	ft_save(int fd, char* storage)
+char*	ft_save(int fd, char* storage, size_t *new_line)
 {
 	char*	buffer;
 	ssize_t	len_read;
@@ -92,6 +90,8 @@ char*	ft_save(int fd, char* storage)
 		storage = ft_strjoin(storage, buffer, '\0');
 		check = checkk(storage, '\n');
 	}
+	printf("check = %zu--------\n", check);
+	*new_line = check;
 	free(buffer);
 	buffer = NULL;
 	return (storage);
@@ -125,6 +125,7 @@ char*	ft_chyata(char* str)
 char*	get_next_line(int fd)
 {
 	static char*	storage;
+	static size_t	new_line;
 	char*			line;
 	char*			str;
 /*
@@ -134,7 +135,9 @@ char*	get_next_line(int fd)
 		storage = NULL;
 		return (NULL);
 	}*/
-	str = ft_save(fd, storage);
+	printf("new_line = %zu---\n", new_line);
+	str = ft_save(fd, storage, &new_line);
+	printf("new_line = %zu---------\n", new_line);
 	line = ft_line(str);
 	storage = ft_chyata(str);
 	return (line);

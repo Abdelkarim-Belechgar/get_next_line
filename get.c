@@ -213,5 +213,5 @@ int main()
 	printf("buffer3 = %s\n", buffer3);
 	printf("buffer4 = %s\n", buffer4);
 	printf("buffer5 = %s\n", buffer5);
-	while (1);
+	//while (1);
 }
