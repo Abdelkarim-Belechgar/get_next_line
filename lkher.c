@@ -62,13 +62,14 @@ char*	ft_strjoin(char* storage, char* buffer, char c)
 		new[z] = storage[z];
 		z++;
 	}
+	ft_free(storage);
 	y = 0;
 	while (buffer && buffer[y] && size > z + y)
 	{
 		new[z + y] = buffer[y];
 		y++;
 	}
-	ft_free(storage);
+	//ft_free(storage);
 	return (new);
 }
 
@@ -84,6 +85,7 @@ char*	ft_save(int fd, char* storage, ssize_t*	line_read)
 		*line_read = read(fd, buffer, BUFFER_SIZE);
 		if (!*line_read)
 		{
+			//ft_free(storage);
 			ft_free(buffer);
 			return (NULL);
 		}
@@ -101,6 +103,7 @@ char*	ft_chyata(char* str)
 
 	size = ft_check(str, '\n');
 	storage = ft_strjoin(NULL, str + size, '\0');
+	free(str);
 	//ft_free(str);
 	return (storage);
 }
@@ -110,8 +113,8 @@ char*	get_next_line(int fd)
 	char*		line;
 	static char*	storage;
 	static size_t	line_read;
+	static size_t	check;
 	size_t		new_line;
-	char*		str;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 	{
@@ -119,16 +122,23 @@ char*	get_next_line(int fd)
 		return (NULL);
 	}
 	new_line = ft_check(storage, '\n');
-	if (!new_line)
-		storage = ft_save(fd, storage, &line_read);
-	if (!line_read)
+	if (check && line_read != BUFFER_SIZE)
 	{
 		ft_free(storage);
 		return (NULL);
 	}
+	if (!new_line)
+	{
+		storage = ft_save(fd, storage, &line_read);
+		check = 1;
+	}
+	/*if (!line_read)
+	{
+		ft_free(storage);
+		return (NULL);
+	}*/
 	line = ft_strjoin(storage, NULL, '\n');
-	str = storage;
-	storage = ft_chyata(str);
+	storage = ft_chyata(storage);
 	return (line);
 }
 
