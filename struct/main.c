@@ -1,23 +1,26 @@
 #include "get_next_line.h"
 
-int	main()
+int main(void)
 {
-	char	*buffer;
-	int	fd;
-	int	z;
+	char*	new;
+	int		fd;
+	size_t	z;
 
-	fd = open("test", O_RDONLY);
+
 	z = 0;
+	fd = open("test", O_RDONLY);
+	printf("fd = %d\n", fd);
 	while (1)
 	{
-		printf("----------fd = %d----------\n");
-		buffer = get_next_line(fd);
-		printf("buffer[%d] = %s", z, buffer);
-		if (buffer)
-			ft_free();
-		else
+	    printf("================ start %zu ================\n", z + 1);
+		new = get_next_line(fd);
+		printf("***===new[%zu] = %s===***\n", z + 1, new);
+	    printf("================= end %zu =================\n\n\n", z + 1);
+		printf("************************************************************************************\n\n\n");
+		if (!new)
 			break;
+		free(new);
 		z++;
 	}
-	return (0);
+    return (0);
 }

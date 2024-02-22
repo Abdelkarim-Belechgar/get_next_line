@@ -1,153 +1,143 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abelechg <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/02/22 06:26:27 by abelechg          #+#    #+#             */
+/*   Updated: 2024/02/22 06:36:52 by abelechg         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
-size_t	ft_check(get_line* head, char c)
-{
-	size_t	check;
-
-	check = 0;
-	while (head)
-	{
-		while ((head->storage)[check] != c)
-			check++;
-		if ((head->storage)[check] == c)
-		{
-			if(c == '\n')
-				check++;
-			return (ckeck);
-		}
-		head = head->next;
-	}
-	return (0);		
-}
-
-char*	ft_calloc(size_t size)
-{
-	char*	allocat;
-	size_t	z;
-
-	if (!size)
-		return (NULL);
-	allocat = (char*)malloc(sizeof(char) * (size + 1));
-	if (!allocat)
-		return (NULL);
-	z = 0;
-	while (size >= z)
-		allocat[z++] = 0;
-	return (allocat);
-}
-
-get_line*	ft_lstnew(size_t BUFFER_SIZE)
-{
-	get_line*	node;
-
-	node = (get_line*)malloc(sizeof(get_line));
-	if (!node)
-		return (NULL);
-	node->storage = ft_calloc(BUFFER_SIZE);
-	node->line_read = BUFFER_SIZE;
-	node->next = NULL;
-	return (node);
-}
-
-void	ft_lstadd_back(get_line **head, get_line *new)
-{
-	get_line*	node;
-	if (!new || !head)
-		return ;
-	if (!*head)
-	{
-		*head = new;
-		return ;
-	}
-	node = *head;
-	while (node-next)
-		node = node->next;
-	if (!node->next))
-		node-next = new;
-}
-
-char*	ft_line(get_line* head, char c)
-{
-	char*	line;
-	size_t	size;
-	size_t	z;
-
-	z = 0;
-	size = ft_check(head, c);
-	line = ft_calloc(size);
-	while (head)
-	{
-		while (size > z)
-		{
-			line->storage[z] = head->storage[z];
-			z++;
-		}
-		head = head->next;
-	}
-	return (line)
-}
-
-get_line*	ft_data(get_line** head)
+int	ft_lstcherch(get_line** head)
 {
 	get_line*	new;
-	size_t		check;
+	size_t		z;
+	int			check;
+	int			res;
+
+	res = 0;
+	check = 0;
+	new = *head;
+	while (new)
+	{
+		z = 0;
+		while (new->storage && new->storage[z] && new->storage[z] != '\n')
+			z++;
+		check += z;
+		if (new->storage && new->storage[z] == '\n')
+			return (check + 1);
+		if (*head && !new->next && *(*head)->lread == -1)
+			res = check;
+		new = new->next;
+	}
+	return (res);
+}
+
+char*	ft_line(get_line** head, int* new_line, int* save_line)
+{
+	get_line*	new;
+	char*		line;
+	int			size;
+	int			y;
+	int			z;
 
 	new = *head;
-	check = ft_check(new, '\n');
-	check = ft_check(new + check, '\0');
-	if (!check)
-		return (NULL);
-	new = ft_lstnew(check);
-	
-	new = ft_line(, '\0');
+	size = *new_line;
+	line = ft_calloc(size);
+	y = 0;
+	while (size > y)
+	{
+		z = 0;
+		while (new && new->storage[z] && size > y)
+			line[y++] = new->storage[z++];
+		if (!new)
+			break;
+		new = new->next;
+	}
+	*save_line = ft_lstsize(head, &size);
+	if (*save_line == 0)
+		ft_lstclear(head);
+	return (line);
 }
 
-void	ft_free(get_line** head)
+get_line*	ft_data(get_line** head, int* save_line, int* new_line)
 {
 	get_line*	new;
-
-	while (*head)
+	get_line*	list;
+	int		    y;
+	int			z;
+	int		    x;
+    
+	new = ft_lstnew(*save_line);
+	y = 0;
+	x = 0;
+	list = *head;
+	while (list)
 	{
-		new = (*head)->next;
-		free((*head)->storage);
-		(*head)->storage = NULL;
-		free(*head);
-		*head = new;
+		z = 0;
+		while (list && list->storage[z])
+		{
+			if (*new_line <= y + z && *save_line > x)
+				new->storage[x++] = list->storage[z++];
+			else
+				z++;
+		}
+		y += z;
+		list = list->next;
 	}
+	*new_line = ft_lstcherch(&new);
+	ft_lstclear(head);
+	return (new);
 }
 
-get_line*	ft_read(int fd, get_line** head, ssize_t* line_read)
+get_line*	ft_read(int fd, get_line** head, int* new_line, int* save_line)
 {
 	get_line*	new;
-	size_t		check;
+	ssize_t		line_read;
 
-	check = ft_check(*head, '\n');
-	if (check > 0)
-	{
-		(*head).line_read = BUFFER_SIZE;
-		return (*head);
-	}
-	while (!check)
+	while (!*head || !*new_line)
 	{
 		new = ft_lstnew(BUFFER_SIZE);
-		*line_read = read(fd, new->storage, BUFFER_SIZE)
-		printf("read = %s---\n", new_storage);
-		head = ft_lstadd_back(head, new);
-		check = ft_check(*head, '\n');
-		ft_free(&new);
+		line_read = read(fd, new->storage, BUFFER_SIZE);
+		if (line_read > 0)
+			ft_lstadd_back(head, new);
+		else
+			ft_lstclear(&new);
+		if (line_read != BUFFER_SIZE)
+		{
+			if (!*head)
+			{
+				*save_line = -1;
+				return (NULL);
+			}
+			*(*head)->lread = -1;
+			break;
+		}
+		*new_line = ft_lstcherch(&new);
 	}
+	*new_line = ft_lstcherch(head);
+	*save_line = ft_lstsize(head, new_line);
 	return (*head);
 }
 
 char*	get_next_line(int fd)
 {
 	static get_line*	head;
-	char*			line;
+	static int			save_line;
+	static int			new_line;
+	char*				line;
 
-	if (fd < 0 || (BUFFER_SIZE <= 0 && head.line_read != BUFFER_SIZE))
+	if (fd < 0 || BUFFER_SIZE <= 0 || save_line == -1)
 		return (NULL);
-	head = ft_read(fd, &head, &head.line_read);
-	line = ft_line(head, '\n');
-	head = ft_data(&head);
+	head = ft_read(fd, &head, &new_line, &save_line);
+	if (!head)
+		return (NULL);
+	line = ft_line(&head, &new_line, &save_line);
+	if (head && save_line != -1)
+		head = ft_data(&head, &save_line, &new_line);
 	return (line);
 }
