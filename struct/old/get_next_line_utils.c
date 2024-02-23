@@ -12,48 +12,41 @@
 
 #include "get_next_line.h"
 
-char	*ft_calloc(size_t size)
+char*	ft_calloc(size_t size)
 {
-	char	*allocat;
+	char*	allocat;
 	size_t	z;
 
-
-		// printf("size = %zu\n", size);
 	if (!size)
 		return (NULL);
-	allocat = (char *)malloc(sizeof(char) * (size + 1));
+	allocat = (char*)malloc(sizeof(char) * (size + 1));
 	if (!allocat)
 		return (NULL);
 	z = 0;
 	while (size >= z)
-	{
-		// printf("size = %zu\n", size);
-		// printf("z = %zu\n", z);
 		allocat[z++] = 0;
-	}
 	return (allocat);
 }
 
-gnl	*ft_lstnew(size_t size)
+get_ln*	ft_lstnew(size_t size)
 {
-	gnl		*node;
+	get_ln*	node;
 
-	node = (gnl *)malloc(sizeof(gnl));
+	node = (get_ln*)malloc(sizeof(get_ln));
 	if (!node)
 		return (NULL);
 	node->storage = ft_calloc(size);
 	node->lread = malloc(sizeof(ssize_t));
 	*node->lread = 0;
 	node->next = NULL;
-	// printf("DEBUG1!\n");
 	return (node);
 }
 
-void	ft_lstadd_back(gnl **head, gnl *new)
+void	ft_lstadd_back(get_ln **head, get_ln *new)
 {
-	gnl		*node;
+	get_ln*	node;
 
-	if (!new)
+    if (!new)
 		return ;
 	if (!(*head))
 	{
@@ -67,13 +60,13 @@ void	ft_lstadd_back(gnl **head, gnl *new)
 		node->next = new;
 }
 
-void	ft_lstclear(gnl **head)
+void	ft_lstclear(get_ln** head)
 {
-	gnl		*new;
+	get_ln*	new;
 
 	if (!*head || !head)
 		return ;
-	while (head && *head)
+	while (*head)
 	{
 		new = (*head)->next;
 		free((*head)->storage);
@@ -85,18 +78,18 @@ void	ft_lstclear(gnl **head)
 	}
 }
 
-int	ft_lstsize(gnl **lst, int	*nline)
+int	ft_lstsize(get_ln **lst, int* nline)
 {
-	gnl		*node;
-	int		size;
-	int		start;
-	int		z;
-	int		y;
+    get_ln*   node;
+    int      size;
+    int      start;
+	int  	z;
+	int	    y;
 
 	z = 0;
 	size = 0;
-	start = *nline;
-	node = *lst;
+    start = *nline;
+    node = *lst;
 	while (start && node)
 	{
 		y = 0;
@@ -105,8 +98,8 @@ int	ft_lstsize(gnl **lst, int	*nline)
 		z += y;
 		node = node->next;
 	}
-	size = z - start;
-	if (!size && *lst && *(*lst)->lread == -1)
-		return (-1);
+    size = z - start;
+    if (!size && *lst && *(*lst)->lread == -1)
+        return (-1);
 	return (size);
 }
