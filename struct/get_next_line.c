@@ -12,162 +12,157 @@
 
 #include "get_next_line.h"
 
-int	ft_lstcherch(gnl **head)
+int	ft_lstcherch(gnl **head, char *str)
 {
-	printf("++++++++++++ start ft_lstcherch ++++++++++++\n\n");
-	int	res;
-	gnl		*new;
-	new = NULL;
-	size_t	z;
-	static int		check;
+	// printf("++++++++++++ start ft_lstcherch ++++++++++++\n\n");
+	int	z;
 
-	res = 0;
-	check = 0;
-	new = *head;
-	printf("address of **head %p\n", head);
-	while (new)
+
+	z = 0;
+	if (!*head && !str)
+		return (-1);
+	while (str && str[z] && *head)
 	{
-		z = 0;
-		while (new->storage && new->storage[z] && new->storage[z] != '\n')
-			z++;
-		check += z;
-		if (new->storage && new->storage[z] == '\n')
+		if (str && str[z] == '\n')
 		{
-			printf("res + '\\n' = %d\n", check + 1);
-			return (check + 1);
+			(*head)->nline = (*head)->nline + z + 1;
+			// printf("find new line\n");
+			// printf("(*head)->nline = %d\n", (*head)->nline);
+			// printf("(*head)->lread = %zd\n", (*head)->lread);
+			return ((*head)->nline);
 		}
-		if (*head && !new->next && *(*head)->lread == -1)
-			res = check;
-		new = new->next;
+		z++;
 	}
-	if (!res && )
-		
-	printf("res = %d\n", res);
-	printf("++++++++++++ end ft_lstcherch ++++++++++++\n\n");
-	return (res);
+	(*head)->nline += z;
+	// printf("(*head)->nline = %d\n", (*head)->nline);
+	// printf("(*head)->lread = %zd\n", (*head)->lread);
+	if ((*head)->lread == -1)
+	{
+		// printf("****lread == -1***\nreturn last line = %d\n", (*head)->nline);
+		return ((*head)->nline);
+	}
+	// printf("++++++++++++ end ft_lstcherch ++++++++++++\n\n");
+	return (0);
 }
 
-gnl	*ft_data(gnl **head, gnl *newz, int save_line, int zz)
+gnl	*ft_data(gnl **head, char *str, int save_line, int zz, int *new_line)
 {
-	printf("++++++++++++ start ft_data ++++++++++++\n\n");
+	// printf("++++++++++++ start ft_data ++++++++++++\n\n");
 	gnl	*new;
 	int	z;
 
 	z = 0;
-	printf("address of **head %p\n", head);
-	printf("**save_line = %d\n", save_line);
+	// printf("**save_line = %d\n", save_line);
+	// printf("**new_line = %d\n", *new_line);
+	if (!save_line)
+	{
+		ft_lstclear(head);
+		head = NULL;
+		*new_line = 0;
+		return (NULL);
+	}
 	new = ft_lstnew(save_line);
-	while (newz && newz->storage[zz])
-		new->storage[z++] = newz->storage[zz++];
+	if ((*head)->lread == -1)
+		new->lread = (*head)->lread;
+	// printf("(*head)->lread = %zd\n", (*head)->lread);
+	while (str && str[zz])
+		new->storage[z++] = str[zz++];
 	ft_lstclear(head);
-	printf("new->storage %s***\n", new->storage);
-	printf("++++++++++++ end ft_data ++++++++++++\n\n");
+	// printf("new->storage %s***\n", new->storage);
+	// printf("******new->storage %s***\n", new->storage);
+	*new_line = ft_lstcherch(&new, new->storage);
+	// printf("**new_line = %d\n", *new_line);
+	// printf("++++++++++++ end ft_data ++++++++++++\n\n");
 	return (new);
 }
 
 char	*ft_line(gnl **head, int *new_line, int *save_line)
 {
-	printf("++++++++++++ start ft_line ++++++++++++\n\n");
+	// printf("++++++++++++ start ft_line ++++++++++++\n\n");
 	gnl		*new;
 	char	*line;
 	int		y;
 	int		z;
 
-	printf("address of **head %p\n", head);
 	new = *head;
-	printf("buffer_size = %d\n", BUFFER_SIZE);
-	printf("*new_line = %d\n", *new_line);
-	line = ft_calloc(*new_line);
+	line = ft_calloc((*head)->nline);
 	y = 0;
-	while (new && *new_line > y)
+	// printf("****save_line = %d***\n", *save_line);
+	while (new && (*head)->nline > y)
 	{
 		z = 0;
-		while (new->storage[z] && *new_line > y)
+		while (new->storage[z] && (*head)->nline > y)
 			line[y++] = new->storage[z++];
-		if (*new_line <= y)
+		if (*new_line == y)
 			break;
 		new = new->next;
 	}
-	printf("line = %s***\n", line);
 	*save_line = ft_lstsize(head, &*new_line);
-	printf("*save_line size = %d\n", *save_line);
+	// printf("****save_line = %d\n", *save_line);
 	if (*save_line == -1)
-	{
-		printf("head is clear\n");
 		ft_lstclear(head);
-	}
 	else
 	{
-		printf("ghadi ndkhlo ldata\n");
-		*head = ft_data(head, new, *save_line, z);
-		printf("(*head)->storage %s***\n", (*head)->storage);
+		// printf("storage = %s\n", new->storage);
+		*head = ft_data(head, new->storage, *save_line, z, &*new_line);
 	}
-	*new_line = ft_lstcherch(head);
-	printf("++++++++++++ end ft_line ++++++++++++\n\n");
+	// printf("++++++++++++ end ft_line ++++++++++++\n\n");
 	return (line);
 }
 
-gnl	*ft_read(int fd, gnl **head, int *new_line, int *save_line)
+gnl	*ft_read(int fd, gnl **head, int *line_size, int *line_save)
 {
-	printf("************* start ft_read ***************\n\n");
+	// printf("************* start ft_read ***************\n\n");
 	gnl		*new;
-	ssize_t	line_read;
+	static ssize_t	line_read;
 
-	printf("address of &head %p\n", &head);
-	printf("address of head %p\n", head);
-	printf("/////create linked list /////\n");
-	while (!*head || !*new_line)
+	while (!*line_size && (!*head || (*head && !(*head)->lread)))
 	{
+		// printf("read\n");
 		new = NULL;
-		printf("address stack of &new %p\n", &new);
-		printf("address heap of new %p\n", new);
 		new = ft_lstnew(BUFFER_SIZE);
-		printf("alocate new\n");
-		printf("address stack of &new %p\n", &new);
-		printf("address heap of new %p\n", new);
 		line_read = read(fd, new->storage, BUFFER_SIZE);
 		if (line_read > 0)
 			ft_lstadd_back(head, new);
 		else
-			ft_lstclear(&new);
-		if (line_read != BUFFER_SIZE)
 		{
-			printf("line_read != BUFFER_SIZE\n");
+			ft_lstclear(&new);
 			if (!*head)
 			{
-				*save_line = -1;
+				*line_save = -1;
 				return (NULL);
 			}
-			*(*head)->lread = -1;
-			break ;
 		}
-		*new_line = ft_lstcherch(&new);
+		if (line_read != BUFFER_SIZE)
+			(*head)->lread = -1;
+		// printf("*line_size = %d\n", *line_size);
+		// printf("(*head)->lread = %zd\n", (*head)->lread);
+		*line_size = ft_lstcherch(head, new->storage);
+
 	}
-	*new_line = ft_lstcherch(head);
-	printf("head->storage = %s\n", (*head)->storage);
-	printf("///// linked list /////\n");
-	printf("************* end ft_read ***************\n\n");
+	// if (*head)
+	// 	printf("(*head)->lread = %zd\n", (*head)->lread);
+	// printf("*line_size = %d\n", *line_size);
+	// printf("************* end ft_read ***************\n\n");
 	return (*head);
 }
 
 char	*get_next_line(int fd)
 {
-	printf("************* start get_next_line ***************\n\n");
-	static gnl		*head;
-	static int		save_line;
-	static int		size_line;
+	static gnl		*save_data;
+	static int		line_save;
+	static int		line_size;
 	char			*str_line;
 
-	printf("save_line = %d\n", save_line);
-	printf("size_line = %d\n", size_line);
-	printf("address stack of head %p\n", &head);
-	printf("address heap of head %p\n", head);
-	if (fd < 0 || BUFFER_SIZE <= 0 || save_line == -1)
+	// printf("***line_save  *****= %d\n", line_save);
+	// printf("***line_size  *****= %d\n", line_size);
+	// printf("***save_data  *****= %p\n", save_data);
+	if (fd < 0 || BUFFER_SIZE <= 0 || line_save == -1)
 		return (NULL);
-	head = ft_read(fd, &head, &size_line, &save_line);
-	if (!head)
+	save_data = ft_read(fd, &save_data, &line_size, &line_save);
+	if (!save_data)
 		return (NULL);
-	str_line = ft_line(&head, &size_line, &save_line);
-	printf("************* end get_next_line ***************\n\n");
+	// printf("save_data->storage = %s\n", save_data->storage);
+	str_line = ft_line(&save_data, &line_size, &line_save);
 	return (str_line);
 }

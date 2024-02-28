@@ -11,6 +11,8 @@
         "unordered_map": "c",
         "utility": "c",
         "vector": "c",
-        "get_next_line.h": "c"
+        "get_next_line.h": "c",
+        "limits.h": "c",
+        "fcntl.h": "c"
     }
 }
