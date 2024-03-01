@@ -13,7 +13,7 @@
 #ifndef GET_NEXT_LINE_H
 #define GET_NEXT_LINE_H
 #ifndef BUFFER_SIZE
-#define	BUFFER_SIZE 5
+#define	BUFFER_SIZE 2
 #endif
 
 #include <stdio.h>
@@ -32,16 +32,9 @@ gnl		*create_new_node(size_t size);
 void	add_back_node(gnl **head, gnl *new);
 void	clear_linked_list(gnl **head);
 int		update_node_size(gnl **head, int index);
-int		search_for_nline(gnl **head, char *str);
+int		search_for_nline(gnl **head);
 gnl		*update_node_save(gnl **head, int index, int *new_line, int *save_line);
 char	*store_new_line(gnl **head, int *new_line, int *save_line);
 gnl		*read_data(int fd, gnl **head, int *new_line, int *line_save);
 char	*get_next_line(int fd);
 #endif
-
-
-
-// int	search_for_nline(gnl **head, char *str)
-// gnl	*update_node_save(gnl **head, char *str, int index, int save_line)
-// char	*store_new_line(gnl **head, int *new_line, int *save_line)
-// gnl	*read_data(int fd, gnl **head, int *new_line, int *save_line)

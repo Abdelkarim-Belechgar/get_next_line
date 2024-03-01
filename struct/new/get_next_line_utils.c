@@ -59,6 +59,7 @@ void	clear_linked_list(gnl **head)
 
 	if (!*head || !head)
 		return ;
+	// printf("****** start clear ******\n");
 	while (head && *head)
 	{
 		new = (*head)->next;
@@ -66,25 +67,36 @@ void	clear_linked_list(gnl **head)
 		(*head)->storage = NULL;
 		(*head)->lread = 0;
 		(*head)->nline = 0;
+		// printf("&head addreass = %p\n", &head);
+		// printf("head addreass = %p\n", head);
+		// printf("&*head addreass = %p\n", &*head);
+		// printf("*head addreass = %p\n", *head);
+		// printf("&**head addreass = %p\n", &**head);
+		// printf("**head addreass = %p\n", **head);
 		free(*head);
 		*head = new;
+		// printf("de_bug 01\n");
 	}
+	// printf("****** end clear ******\n");
 }
 
 int	update_node_size(gnl **head, int index)
 {
 	int		size;
 	gnl		*node;
+	// ssize_t lread;
 
 	node = *head;
+	if (!*head)
+		return (0);
+	// printf("*********check size*******\n");
 	if (node->next)
 		node = node->next;
 	size = 0;
 	while (node->storage && node->storage[index + size])
+	{
+		// printf("size = %d\n", size + 1);
 		size++;
-	if (!size)
-		clear_linked_list(head);
-	if (!size && *head && (*head)->lread == -1)
-		return (-1);
+	}
 	return (size);
 }
