@@ -40,20 +40,16 @@ int main(void)
 	char*	new;
 	int		fd;
 	size_t	z;
-	fd = open("./input.txt", O_RDONLY);
+	fd = open("test.txt", O_RDONLY);
 	z = 0;
-	while (1)
+	while(1)
 	{
-		printf("================ start %zu ================\n", z + 1);
 		new = get_next_line(fd);
-		// printf("%s", new);
-		printf("***===new[%zu] ====%s===***\n", z + 1, new);
-	    printf("================= end %zu =================\n\n\n", z + 1);
-		printf("************************************************************************************\n\n\n");
-		if (!new)
-			break ;
+		printf("%s",new);
+		if(new == NULL)
+			break;
 		free(new);
-		z++;
 	}
+	// system("leaks a.out");
     return (0);
 }

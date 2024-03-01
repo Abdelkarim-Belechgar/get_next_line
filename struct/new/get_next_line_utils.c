@@ -12,7 +12,7 @@
 
 #include "get_next_line.h"
 
-gnl	*create_new_node(size_t size)
+gnl	*create_new_node(size_t size) // 20
 {
 	gnl		*node;
 	size_t	z;
@@ -20,13 +20,15 @@ gnl	*create_new_node(size_t size)
 	if (!size)
 		return (NULL);
 	z = 0;
-	node = NULL;
 	node = (gnl *)malloc(sizeof(gnl));
 	if (!node)
 		return (NULL);
 	node->storage = (char *)malloc(sizeof(char) * (size + 1));
 	if (!node->storage)
+	{
+		clear_linked_list(&node);
 		return (NULL);
+	}
 	while (size >= z)
 		node->storage[z++] = 0;
 	node->lread = 0;
@@ -35,7 +37,7 @@ gnl	*create_new_node(size_t size)
 	return (node);
 }
 
-void	add_back_node(gnl **head, gnl *new)
+void	add_back_node(gnl **head, gnl *new) // 13
 {
 	gnl		*node;
 
@@ -53,13 +55,12 @@ void	add_back_node(gnl **head, gnl *new)
 		node->next = new;
 }
 
-void	clear_linked_list(gnl **head)
+void	clear_linked_list(gnl **head) // 
 {
 	gnl		*new;
 
 	if (!*head || !head)
 		return ;
-	// printf("****** start clear ******\n");
 	while (head && *head)
 	{
 		new = (*head)->next;
@@ -67,36 +68,24 @@ void	clear_linked_list(gnl **head)
 		(*head)->storage = NULL;
 		(*head)->lread = 0;
 		(*head)->nline = 0;
-		// printf("&head addreass = %p\n", &head);
-		// printf("head addreass = %p\n", head);
-		// printf("&*head addreass = %p\n", &*head);
-		// printf("*head addreass = %p\n", *head);
-		// printf("&**head addreass = %p\n", &**head);
-		// printf("**head addreass = %p\n", **head);
 		free(*head);
 		*head = new;
-		// printf("de_bug 01\n");
 	}
-	// printf("****** end clear ******\n");
+	*head = NULL;
 }
 
-int	update_node_size(gnl **head, int index)
+int	update_node_size(gnl **head, int index) // 
 {
 	int		size;
 	gnl		*node;
-	// ssize_t lread;
 
 	node = *head;
 	if (!*head)
 		return (0);
-	// printf("*********check size*******\n");
 	if (node->next)
 		node = node->next;
 	size = 0;
 	while (node->storage && node->storage[index + size])
-	{
-		// printf("size = %d\n", size + 1);
 		size++;
-	}
 	return (size);
 }
