@@ -10,31 +10,33 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# ifndef GET_NEXT_LINE_H
-#  define GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 1
 # endif
 
-# include <stdlib.h>
 # include <unistd.h>
+# include <stdlib.h>
+# include <fcntl.h>
+# include <stdio.h>
 
-typedef	struct t_list
+typedef struct t_list
 {
-	char*					storage;
-	ssize_t					lread;
-	int						nline;
-	struct t_list*	next;
-}	gnl;
+	char			*storage;
+	ssize_t			lread;
+	int				nline;
+	struct t_list	*next;
+}	t_line;
 
-gnl		*create_new_node(size_t size);
-void	add_back_node(gnl **head, gnl *new);
-void	clear_linked_list(gnl **head);
-int		update_node_size(gnl **head, int index);
-int		search_for_nline(gnl **head);
-gnl		*update_node_save(gnl **head, int index, int *new_line, int *save_line);
-char	*store_new_line(gnl **head, int *new_line, int *save_line);
-gnl		*read_data(int fd, gnl **head, int *new_line, int *line_save);
+t_line	*create_new_node(size_t size);
+void	add_back_node(t_line **head, t_line *new);
+void	clear_linked_list(t_line **head);
+int		save_node_size(t_line **head, int index);
+int		search_for_nline(t_line **head);
+t_line	*update_node(t_line **head, int index, int save_line);
+char	*store_new_line(t_line **head, ssize_t new_line, int save_line);
+t_line	*read_data(int fd, t_line **head, ssize_t *new_line);
 char	*get_next_line(int fd);
 
 #endif

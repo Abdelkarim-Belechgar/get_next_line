@@ -12,22 +12,20 @@
 
 #include "get_next_line.h"
 
-
-
-gnl	*update_node_save(gnl **head, int index, int *new_line, int *save_line) // 23
+t_line	*update_node(t_line **head, int index, int save_line)
 {
-	gnl	*new;
-	gnl	*node;
-	int	z;
+	t_line	*new;
+	t_line	*node;
+	int		z;
 
 	z = 0;
 	new = NULL;
 	node = *head;
 	while (node->next)
 		node = node->next;
-	if (*save_line > 0)
+	if (save_line > 0)
 	{
-		new = create_new_node(*save_line);
+		new = create_new_node(save_line);
 		new->lread = (*head)->lread;
 		while (node->storage && node->storage[index + z])
 		{
@@ -35,44 +33,42 @@ gnl	*update_node_save(gnl **head, int index, int *new_line, int *save_line) // 2
 			z++;
 		}
 		new->storage[z] = 0;
-		*save_line = 0;
+		save_line = 0;
 	}
 	clear_linked_list(head);
 	return (new);
 }
 
-char	*store_new_line(gnl **head, int *new_line, int *save_line) // 22
+char	*store_new_line(t_line **head, ssize_t new_line, int save_line)
 {
-	gnl		*new;
+	t_line	*new;
 	char	*line;
 	int		index;
-	int		y;
+	int		z;
 
 	new = *head;
-	line = (char *)malloc(sizeof(char) * (*new_line + 1));
+	line = (char *)malloc(sizeof(char) * (new_line + 1));
 	if (!line)
 		return (NULL);
-	y = 0;
-	while (new && (*save_line + (*head)->nline) > y)
+	z = 0;
+	while (new && (new_line > z))
 	{
 		index = 0;
-		while (new->storage[index] && (*save_line + (*head)->nline) > y)
-			line[y++] = new->storage[index++];
-		if (*new_line == y)
+		while (new->storage[index] && (save_line + (*head)->nline) > z)
+			line[z++] = new->storage[index++];
+		if (new_line == z)
 			break ;
 		new = new->next;
 	}
-	line[y] = 0;
-	*save_line = update_node_size(&new, index);
-	if (!*save_line && *head && (*head)->lread == -1)
-		*save_line = -1;
-	*head = update_node_save(head, index, &*new_line, &*save_line);
+	line[z] = 0;
+	save_line = save_node_size(&new, index);
+	*head = update_node(head, index, save_line);
 	return (line);
 }
 
-gnl	*read_data(int fd, gnl **head, int *new_line, int *save_line) // 24
+t_line	*read_data(int fd, t_line **head, ssize_t *new_line)
 {
-	gnl		*new;
+	t_line	*new;
 
 	while (!*new_line)
 	{
@@ -87,31 +83,32 @@ gnl	*read_data(int fd, gnl **head, int *new_line, int *save_line) // 24
 		{
 			clear_linked_list(&new);
 			if (!*head)
-			{
-				*save_line = -1;
 				return (NULL);
-			}
 		}
-		if (*new_line != BUFFER_SIZE)
-			(*head)->lread = -1;
+		(*head)->lread = *new_line;
 		*new_line = search_for_nline(head);
 	}
 	return (*head);
 }
 
-char	*get_next_line(int fd) // 11
+char	*get_next_line(int fd)
 {
-	static gnl		*save_data;
-	static int		new_line;
-	static int		save_line;
+	static t_line	*save_data;
 	char			*str_line;
+	ssize_t			new_line;
+	int				save_line;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || save_line == -1)
+	new_line = 0;
+	save_line = 0;
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
+	{
+		clear_linked_list(&save_data);
 		return (NULL);
+	}
 	new_line = search_for_nline(&save_data);
-	save_data = read_data(fd, &save_data, &new_line, &save_line);
+	save_data = read_data(fd, &save_data, &new_line);
 	if (!save_data)
 		return (NULL);
-	str_line = store_new_line(&save_data, &new_line, &save_line);
+	str_line = store_new_line(&save_data, new_line, save_line);
 	return (str_line);
 }
