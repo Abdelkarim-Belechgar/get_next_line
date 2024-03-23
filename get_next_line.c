@@ -5,110 +5,112 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: abelechg <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/20 06:55:57 by abelechg          #+#    #+#             */
-/*   Updated: 2024/01/22 22:09:57 by abelechg         ###   ########.fr       */
+/*   Created: 2024/03/21 05:53:58 by abelechg          #+#    #+#             */
+/*   Updated: 2024/03/21 05:54:02 by abelechg         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-/*
-char	*ft_strjoin(char *s1, char *s2)
-{
-	while ()
-}
-*/
-int	find(char	*buffer, int n)
-{
-	char	*buf;
+#include "get_next_line.h"
 
-	if (!buffer)
-		return (0);
-	buf = buffer;
-	while (buf && *buf != '\n' && n--)
-		buf++;
-	if (*buf == '\n')
-		return (1);
-	return (0);
-}
-
-char	*ft_string(char *new, char *buf, ssize_t n)
+t_line	*update_node(t_line **head, int index, int save_line)
 {
-	char	*buffer;
+	t_line	*new;
+	t_line	*node;
 	int		z;
-	int		y;
 
-	//ps
-	//lsof -p 22
-	if (buf)
-	{
-		buffer = (char *)malloc(sizeof(char) * (n + 1));
-		y = 0;
-	}
-	else
-	{
-		buffer = (char *)malloc(sizeof(char) * (strlen(new) + n + 1));
-		y = strlen(new);
-	}
 	z = 0;
-	while (n)
-	{
-		//printf("buf[%d] = %c\t", z, buf[z]);
-		if (buf[z] != '\n')
-		{
-			buffer[z] = buf[z + y];
-			n--;
-		}
-		else
-		{
-			y++;
-			buffer[z] = buf[z + y];
-		}
-		z++;
-	}
-	printf("z = %d\n", z);
-	buffer[z] = '\0';
-	printf("buffern = %s\n", buffer);
-	return (buffer);
-}
-char *get_next_line(int fd)
-{
-	int		count;
-	char	*buffer;
-	char	*new;
-	int		z;
-	int		y;
-	ssize_t	n;
-	ssize_t	m;
-
-	m = 30;
-	n = 30;
-	y = 0;
 	new = NULL;
-	while (n >= m)
+	node = *head;
+	while (node->next)
+		node = node->next;
+	if (save_line > 0)
 	{
-		n = read(fd, buffer, n);
-		z = find(buffer, n);
-		//printf("z find = %d\n", z);
-		//printf("buffer = %s\n", buffer);
-		new = ft_string(new, buffer, n);
-		printf("new[%d] = %s\n", y, new);
-		//printf("n read = %zu\n\n", n);
-		y++;
+		new = create_new_node(save_line);
+		if (!new)
+			return (NULL);
+		new->lread = (*head)->lread;
+		while (node->storage && node->storage[index + z])
+		{
+			new->storage[z] = node->storage[index + z];
+			z++;
+		}
+		new->storage[z] = 0;
+		save_line = 0;
 	}
-	//new = strdup(buffer);
+	clear_linked_list(head);
 	return (new);
 }
 
-int main()
+char	*store_new_line(t_line **head, ssize_t new_line, int save_line)
 {
-	int fd;
-	char *buffer;
+	t_line	*new;
+	char	*line;
+	int		index;
+	int		z;
 
-	fd = open("9a7ba", O_RDONLY);
-	buffer = get_next_line(fd);
-	return (0);
+	new = *head;
+	line = (char *)malloc(sizeof(char) * (new_line + 1));
+	if (!line)
+		return (NULL);
+	z = 0;
+	while (new && (new_line > z))
+	{
+		index = 0;
+		while (new->storage[index] && (save_line + (*head)->nline) > z)
+			line[z++] = new->storage[index++];
+		if (new_line == z)
+			break ;
+		new = new->next;
+	}
+	line[z] = 0;
+	save_line = save_node_size(new, index);
+	*head = update_node(head, index, save_line);
+	return (line);
+}
+
+t_line	*read_data(int fd, t_line **head, ssize_t *new_line)
+{
+	t_line	*new;
+
+	while (!*new_line)
+	{
+		new = create_new_node(BUFFER_SIZE);
+		if (!new)
+			return (NULL);
+		*new_line = read(fd, new->storage, BUFFER_SIZE);
+		new->storage[*new_line] = 0;
+		if (*new_line > 0)
+			add_back_node(head, new);
+		else
+		{
+			clear_linked_list(&new);
+			if (!*head)
+				return (NULL);
+		}
+		(*head)->lread = *new_line;
+		*new_line = search_for_nline(head);
+	}
+	return (*head);
+}
+
+char	*get_next_line(int fd)
+{
+	static t_line	*save_data;
+	char			*str_line;
+	ssize_t			new_line;
+	int				save_line;
+
+	new_line = 0;
+	save_line = 0;
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
+	{
+		clear_linked_list(&save_data);
+		return (NULL);
+	}
+	new_line = search_for_nline(&save_data);
+	save_data = read_data(fd, &save_data, &new_line);
+	if (!save_data)
+		return (NULL);
+	str_line = store_new_line(&save_data, new_line, save_line);
+	return (str_line);
 }
