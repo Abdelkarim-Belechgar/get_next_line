@@ -1,0 +1,14 @@
+t_line	*read_data(int fd, t_line **head, ssize_t *new_line
+
+t_line	*read_data(int fd, t_line **head, ssize_t *new_line)
+{
+	t_line	*new;
+
+	while (!*new_line)
+	{
+		new = create_new_node(BUFFER_SIZE);
+		if (!new)
+			return (NULL);
+		*new_line = read(fd, new->storage, BUFFER_SIZE);
+		new->storage[*new_line] = 0;
+		if (*new_line > 0)
