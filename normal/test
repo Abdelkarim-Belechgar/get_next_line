@@ -1,5 +1,5 @@
-t_line	*read_data(int fd, t_line **head, ssize_t *new_line
-
+t_line	*read_data(int fd, t_line **head, ssize_t *new_line%
+s
 t_line	*read_data(int fd, t_line **head, ssize_t *new_line)
 {
 	t_line	*new;

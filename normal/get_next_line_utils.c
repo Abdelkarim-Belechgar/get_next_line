@@ -12,27 +12,66 @@
 
 #include "get_next_line.h"
 
-void	clear_string(char **str)
+void	clear_string(char **data)
 {
-	if (!str || !*str)
-		return ;
-	free(*str);
-	*str = NULL;
+	if (data && *data && **data)
+	{
+		free(*data);
+		*data = NULL;
+	}
 }
 
-ssize_t search_for_nline(char *str, ssize_t *size_flag)
+size_t	update_size(char *data)
 {
-	ssize_t	size;
+	size_t	z;
 
-	if (!str)
-		return (0);
+	z = 0;
+	while (data && data[z])
+		z++;
+	return (z);
+}
+
+size_t	search_for_nline(char *buffer, size_t *flag)
+{
+	size_t	size;
+
 	size = 0;
-	while (str && str[size])
+	while (buffer && buffer[size])
 	{
-		if (str[size] == '\n')
-			return (size + 1);
+		if (buffer[size] == '\n')
+		{
+			*flag = *flag + size + 1;
+			return (*flag);
+		}
 		size++;
 	}
-	*size_flag += size;
+	*flag += size;
 	return (0);
+}
+
+void	join_string(char **data, char *buffer, size_t flag, ssize_t size)
+{
+	char	*save;
+	size_t	z;
+
+	save = (char *)malloc(sizeof(char) * (flag + size + 1));
+	if (!save)
+	{
+		clear_string(data);
+		return ;
+	}
+	z = 0;
+	if (data && *data)
+	{
+		while ((*data)[z])
+		{
+			save[z] = (*data)[z];
+			z++;
+		}
+	}
+	while (buffer && *buffer)
+		save[z++] = *buffer++;
+	save[z] = '\0';
+	clear_string(data);
+	*data = save;
 }

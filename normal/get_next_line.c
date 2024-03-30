@@ -12,80 +12,103 @@
 
 #include "get_next_line.h"
 
-char	*join_string(char **storage, char *buffer, ssize_t *size_flag, ssize_t *size_line)
+void	update_data(char **data, size_t flag)
 {
 	char	*save;
-	char	*tmp;
-	ssize_t	z;
-
-	printf("size = %lu", *size_flag + *size_line);
-	save = (char *)malloc(sizeof(char) * (*size_flag + *size_line + 1));
+	size_t	size;
+	size_t	z;
+	
+	size = update_size(*data + flag);
+	if (!flag)
+	{
+		clear_string(data);
+		return ;
+	}
+	save = malloc(sizeof(char) * (size + 1));
 	if (!save)
 	{
-		if (storage && *storage)
-			clear_string(storage);
-		return (NULL);
+		clear_string(data);
+		return ;
 	}
 	z = 0;
-	printf("save_flag = %zu\n", *size_flag);
-	tmp = *storage;
-	while (z < *size_flag + *size_line)
+	while (size > z)
 	{
-		if (z < *size_flag)
-			save[z] = tmp[z];
-		else
-			save[z] = buffer[z];
+		save[z] = (*data)[flag + z];
 		z++;
 	}
 	save[z] = 0;
-	printf("**ss = %s**\n", save);
-	clear_string(storage);
-	return (save);
+	*data = save;
 }
 
-char	*read_data(int fd, char **storage, ssize_t *size_flag, ssize_t *size_line)
+char	*sorte_new_line(char *data, size_t flag)
+{
+	char	*line;
+	size_t	z;
+
+	if (!flag)
+		return (NULL);
+	line = malloc(sizeof(char) * (flag + 1));
+	if (!line)
+		return (NULL);
+	z = 0;
+	while (flag > z)
+	{
+		line[z] = data[z];
+		z++;
+	}
+	line[z] = 0;
+	return (line);
+}
+
+char	*read_data(int fd, char **data, size_t *flag, ssize_t size)
 {
 	char	*buffer;
 
 	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buffer)
 	{
-		if (!*size_flag)
-			clear_string(storage);
+		clear_string(data);
 		return (NULL);
 	}
-	while (!*size_line)
+	while (!size)
 	{
-		*size_line = read(fd, buffer, BUFFER_SIZE);
-		buffer[*size_line] = 0;
-		printf("buffer = *%s*\n", buffer);
-		if (*size_line != BUFFER_SIZE)
+		size = read(fd, buffer, BUFFER_SIZE);
+		if (size == 0)
 			break ;
-		*storage = join_string(storage, buffer, size_flag, size_line);
-		*size_line = search_for_nline(buffer, size_flag);
+		buffer[size] = 0;
+		join_string(data, buffer, *flag, size);
+		size = search_for_nline(buffer, flag);
+
 	}
-	printf("hell\n");
 	clear_string(&buffer);
-	return (*storage);
+	if (!data || !*data)
+		return (NULL);
+	buffer = sorte_new_line(*data, *flag);
+	if (!buffer)
+	{
+		clear_string(data);
+		return (NULL);
+	}
+	return (buffer);
 }
 
-char    *get_next_line(int fd)
+char	*get_next_line(int fd)
 {
-	static char	*storage;
+	static char	*data;
 	char		*line;
-	ssize_t		size_flag;
-	ssize_t		size_line;
+	ssize_t		size;
+	size_t		new_line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
 	{
-		clear_string(&storage);
+		clear_string(&data);
 		return (NULL);
 	}
-	size_flag = 0;
-	size_line = search_for_nline(storage, &size_flag);
-	line = read_data(fd, &storage, &size_flag, &size_line);
+	new_line = 0;
+	size = search_for_nline(data, &new_line);
+	line = read_data(fd, &data, &new_line, size);
 	if (!line)
 		return (NULL);
-	printf("***%s***\n", line);
+	update_data(&data, new_line);
 	return (line);
 }
